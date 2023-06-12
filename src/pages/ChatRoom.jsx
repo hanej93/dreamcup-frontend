@@ -1,45 +1,100 @@
 import React, { useState, useEffect } from 'react';
-import { Form, InputGroup, Button, ListGroup } from 'react-bootstrap';
-import { useLocation  } from 'react-router-dom';
+import { Container, Row, Col, FormControl, Button, Alert } from 'react-bootstrap';
+import SockJS from 'sockjs-client';
+import { Client } from '@stomp/stompjs';
 import axios from 'axios';
+import { useLocation  } from 'react-router-dom';
 
-
-const ChatRoom = () => {
-  const [message, setMessage] = useState('');
-  const [chatLog, setChatLog] = useState([]);
+function ChatRoom() {
   const location = useLocation();
-  const apiurl = '/api/chatRoom/' + location.roomId;
 
-  const handleChange = (event) => {
-    setMessage(event.target.value);
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    setChatLog([...chatLog, message]);
-    setMessage('');
-  };
+  const [stompClient, setStompClient] = useState(null);
+  const [message, setMessage] = useState("");
+  const [sender, setSender] = useState("");
+  const [messages, setMessages] = useState([]);
+  const chatRoomId = location.state.chatRoomId;
 
   useEffect(() => {
-    axios.get(apiurl)
-      .then(response => {
-        console.log("response.data");
-        console.log(response.data);
-      })
-      .catch(error => {
-        console.error('목록 조회 오류', error);
-      });
-  }, [apiurl]);
+    // var client = new Client({
+    //   webSocketFactory: () => new SockJS('/ws'),
+    // });
+    // let subscription;
+
+    // client.brokerURL = '/ws';
+    // client.onConnect = function(frame) {
+    //     console.log('Connected: ' + frame);
+    //     subscription = client.subscribe('/exchange/chat.exchange/message.' + chatRoomId, function(message) {
+    //         console.log(`<<< message: ${message}`);
+    //         showMessage(JSON.parse(message.body));
+    //     });
+    // };
+
+    // client.onStompError = function(frame) {
+    //   console.log('Broker reported error: ' + frame.headers['message']);
+    //   console.log('Additional details: ' + frame.body);
+    // };
+
+    // client.activate();
+
+    // setStompClient(client);
+
+    // return () => {
+    //   if(subscription) {
+    //     subscription.unsubscribe();
+    //   }
+    //   if(client.active) {
+    //     client.deactivate();
+    //   }
+    //   console.log("Disconnected");
+    // }
+    // chatRoomId
+}, []);
+
+useEffect(() => {
+  axios.get('/api/chat-rooms', {
+    params: chatRoomId
+  })
+  .then(response => {
+    console.log(response.data);
+  })
+  .catch(error => {
+    console.error('목록 조회 오류', error);
+  });
+}, [chatRoomId]);
+
+  const sendMessage = () => {
+    let chatVo = {
+        chatRoomId: chatRoomId,
+        senderId: sender,
+        content: message,
+    };
+    stompClient.send("/pub/message", {}, JSON.stringify(chatVo));
+  }
+
+  const showMessage = (message) => {
+    setMessages(prevMessages => [...prevMessages, message]);
+  }
 
   return (
-    <div className="container mt-5">
-      <div className="row">
-        <div className="col-md-8 offset-md-2">
-          <h3 className="text-center">Chat Room</h3>
-        </div>
-      </div>
-    </div>
+    <Container>
+        <Row>
+            <Col md={{ span: 6, offset: 3 }} className="mt-5">
+                <h2>Chat Room</h2>
+                <div className="mt-3">
+                    {messages.map((message, i) => (
+                        <Alert key={i} variant="primary">
+                            <strong>{message.sender}</strong>: {message.content}
+                        </Alert>
+                    ))}
+                </div>
+                <FormControl className="mt-3" placeholder="Type your message..." value={message} onChange={e => setMessage(e.target.value)} />
+                <Button className="mt-3" onClick={sendMessage}>Send</Button>
+                <FormControl className="mt-3" placeholder="Sender..." value={sender} onChange={e => setSender(e.target.value)} />
+                <FormControl className="mt-3" value={chatRoomId} disabled />
+            </Col>
+        </Row>
+    </Container>
   );
-};
+}
 
 export default ChatRoom;

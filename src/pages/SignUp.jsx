@@ -30,16 +30,15 @@ const SignUp = () => {
 
   const handleSignUp = async (e) => {
     e.preventDefault();
+    setError('');
 
     if (!nickname || !username || !password) {
       setError('정보를 모두 입력해 주세요');
-      console.log("1");
       return;
     }
 
     if (!validateEmail(username)) {
       setError('유효한 이메일 형식으로 입력해 주세요');
-      console.log("2");
       return;
     }
 
@@ -56,6 +55,7 @@ const SignUp = () => {
     } catch (error) {
       // Handle error
       console.error('Sign-up error:', error);
+      setError(error);
     }
   };
 
@@ -79,36 +79,37 @@ const SignUp = () => {
               <Form.Group controlId="formNickname" className="mb-3">
                 <Form.Control
                   type="text"
-                  placeholder="Enter your nickname"
+                  placeholder="Nickname을 입력해주세요"
                   value={nickname}
                   onChange={handleNicknameChange}
+                  isInvalid={error}
                 />
               </Form.Group>
 
               <Form.Group controlId="formUsername" className="mb-3">
                 <Form.Control
                   type="text"
-                  placeholder="Enter your email"
+                  placeholder="이메일 주소를 입력해 주세요"
                   value={username}
                   onChange={handleUsernameChange}
-                  isInvalid={error && !validateEmail(username)}
+                  isInvalid={error}
                 />
-                {error && !validateEmail(username) && (
-                  <Form.Control.Feedback type="invalid">
-                    {error}
-                  </Form.Control.Feedback>
-                )}
               </Form.Group>
 
               <Form.Group controlId="formPassword" className="mb-3">
                 <Form.Control
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder="비밀번호를 입력해주세요"
                   value={password}
                   onChange={handlePasswordChange}
+                  isInvalid={error}
                 />
               </Form.Group>
-
+              {error && (
+                  <div className="alert alert-danger mt-3" role="alert">
+                      {error}
+                  </div>
+              )}
               <Button variant="primary" type="submit" className="mb-3 w-100">
                 가입하기
               </Button>

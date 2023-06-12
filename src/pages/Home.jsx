@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Navbar, Nav, Button, Container } from 'react-bootstrap';
+import { Navbar, Nav, Button, Container, Row, Col } from 'react-bootstrap';
 import { useNavigate  } from 'react-router-dom';
 import ChatList from '../pages/ChatList';
+import ChatRoomCreateModal from '../pages/ChatRoomCreateModal';
 
 const Home = () => {
   // session storage 접근
@@ -14,7 +15,7 @@ const Home = () => {
   axios.defaults.headers.common['Authorization'] = token;
 
   const [user, setUser] = useState("");
-  //let user = {};
+
 
   const moveToSignUpPage = () => {
     navigate('/signUp');
@@ -36,25 +37,22 @@ const Home = () => {
     navigate(0);
   };
 
-  useEffect(()=> {
-    axios.get('/user')
-      .then(response => {
-        // 현재 로그인한 사람 정보 가져오는 api 필요
-        if(!response.data || !(typeof response.data == "object" )) {
-          setUser({
-            "nickname" : "테스터",
-            "username" : "이메일주소"
-          });
-          console.log("통신 성공");
-        } else {
-          setUser(response.data);
-        }
-      })
-      .catch(error => {
-        console.log("목록 실패 ");
+  const setInfoSetting = () => {
+    console.log("setting");
+    const creator = JSON.parse(sessionStorage.getItem('dreamcup-userData'));
+    if(creator) {
+      setUser({
+        nickname: creator.nickname
       });
-  }, [])
+    }    
+  }
+
+  useEffect(()=>{
+    setInfoSetting();
+  }, []);
   
+
+  // <!-- <ChatList/> -->
 
   return (
     <div className="App bg-light">
@@ -84,7 +82,17 @@ const Home = () => {
         </Navbar.Collapse>
       </Navbar>
         {isLoggedIn ? (
-          <ChatList/>
+          <Container fluid>
+            <Row>
+              <h2 className="text-center mb-5">입장 가능한 방 목록</h2>
+              <Col xs={8} style={{ height: "50em", overflow: "auto" }} id="scrollableDiv">
+                <ChatList/>
+              </Col>
+              <Col xs={4}>
+                <ChatRoomCreateModal/>
+              </Col>
+            </Row>
+          </Container>
         ) : ( <> 
           <Container className="py-5">
             <h1 className="display-4 text-primary">드림컵에 오신걸 환영합니다</h1>

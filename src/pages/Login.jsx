@@ -25,6 +25,7 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError('');
 
     if (!username || !password) {
       setError('정보를 모두 입력해 주세요');
@@ -42,16 +43,19 @@ const Login = () => {
         password
       });
       console.log('Login success:', response.data);
-      // 'Authorization' header 에서 토큰 빼오기
+      // 'Authorization' header 에서 토큰 빼오기 
       const token = response.headers.authorization;
-
       // session storage 에 저장
       sessionStorage.setItem('dreamcup-token', token);
+      sessionStorage.setItem('dreamcup-userData', JSON.stringify(response.data));
+      setError('');
       navigate('/');
     } catch (error) {
       console.error('Login error:', error);
       setUsername("");
       setPassword("");
+      setError(`아이디 또는 비밀번호를 잘못 입력했습니다.
+      입력하신 내용을 다시 확인해주세요.`);
     }
   };
 
@@ -74,33 +78,27 @@ const Login = () => {
               <Form.Group controlId="formUsername">
                 <Form.Control
                   type="text"
-                  placeholder="Enter your email"
+                  placeholder="이메일 주소를 입력해 주세요"
                   value={username}
                   onChange={handleUsernameChange}
                   isInvalid={error && !validateEmail(username)}
                   className="mb-3"
                 />
-                {error && !validateEmail(username) && (
-                  <Form.Control.Feedback type="invalid">
-                    {error}
-                  </Form.Control.Feedback>
-                )}
               </Form.Group>
-
               <Form.Group controlId="formPassword">
                 <Form.Control
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder="비밀번호를 입력해주세요"
                   value={password}
                   onChange={handlePasswordChange}
                   className="mb-3"
                 />
               </Form.Group>
-              <div className="checkbox mb-3">
-                <label>
-                  <input type="checkbox" value="remember-me" /> 아이디 저장하기
-                </label>
-              </div>
+              {error && (
+                  <div className="alert alert-danger mt-3" role="alert">
+                      {error}
+                  </div>
+              )}
               <Button variant="primary" type="submit" className="mb-3 w-100">
                 로그인
               </Button>
