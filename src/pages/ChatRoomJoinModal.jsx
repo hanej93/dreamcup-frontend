@@ -13,38 +13,42 @@ function ChatRoomJoinModal() {
   const handleClose = () => setShow(false);
   const handleShow = () => {
     setCode('');
+    setError('');
     setShow(true);
   }
 
   const handleCodeChange = (e) => {
     setCode(e.target.value);
+    console.log(e.target.value);
+    console.log(code.length);
+    if(String(e.target.value).length === 6 ) {
+      handleCreateChatRoom(e.target.value);
+    } 
   };
 
-  const handleCreateChatRoom = async (e) => {
-    e.preventDefault();
+  const handleCreateChatRoom = async (priviteCode) => {
     setError('');
 
-    if (!code || code.length < 6) {
+    console.log("console.log(priviteCode); " + priviteCode);
+
+    if (!priviteCode || priviteCode.length < 6) {
       setError('코드를 입력해주세요');
       return;
-    }
+    }  
 
-    console.log("code ::: " + code);    
-
-    const creator = JSON.parse(sessionStorage.getItem('dreamcup-userData')).id;
-
-    console.log(sessionStorage.getItem('dreamcup-userData'));
-
+    const creator = JSON.parse(sessionStorage.getItem('dreamcup-userData')).memberId;
+    console.log("creator " + creator);
     try {
-      const response = await axios.post('/api/chat-rooms', {
-        code,
-        creator
+      const response = await axios.post('/api/chat-rooms/private-join', {
+        "privateCode" : priviteCode,
+        "participantId" : creator
       });
 
       console.log('make success:', response.data);
       navigate('/chatRoom', { state: { "chatRoomId": response.data } });
     } catch (error) {
       console.error('make error:', error);
+      setError(error.response.data.message);
     }
   };
 
@@ -52,7 +56,7 @@ function ChatRoomJoinModal() {
   return (
     <>
       <Button variant="primary" onClick={handleShow}>
-        방 참가하기
+        코드 입력하기
       </Button>
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
@@ -77,9 +81,6 @@ function ChatRoomJoinModal() {
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="primary" onClick={handleCreateChatRoom}>
-            참가하기
-          </Button>
         </Modal.Footer>
       </Modal>
     </>

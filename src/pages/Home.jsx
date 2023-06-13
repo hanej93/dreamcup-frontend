@@ -4,6 +4,7 @@ import { Navbar, Nav, Button, Container, Row, Col } from 'react-bootstrap';
 import { useNavigate  } from 'react-router-dom';
 import ChatList from '../pages/ChatList';
 import ChatRoomCreateModal from '../pages/ChatRoomCreateModal';
+import ChatRoomJoinModal from '../pages/ChatRoomJoinModal';
 
 const Home = () => {
   // session storage 접근
@@ -90,6 +91,7 @@ const Home = () => {
               </Col>
               <Col xs={4}>
                 <ChatRoomCreateModal/>
+                <ChatRoomJoinModal/>
               </Col>
             </Row>
           </Container>

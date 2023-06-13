@@ -4,17 +4,21 @@ import axios from 'axios';
 import { useNavigate  } from 'react-router-dom';
 
 function ChatRoomCreateModal() {
+  const token = sessionStorage.getItem('dreamcup-token');
+  axios.defaults.headers.common['Authorization'] = token;
+
   const navigate = useNavigate();
 
   const [show, setShow] = useState(false);
   const [title, setTitle] = useState('');
   const [userMaxCount, setUserMaxCount] = useState('');
-  const [isPrivate, setIsPrivate] = useState('');
+  const [isPrivate, setIsPrivate] = useState(false);
   const [error, setError] = useState('');
 
   const handleClose = () => setShow(false);
   const handleShow = () => {
     setTitle('');
+    setError('');
     setUserMaxCount('');
     setIsPrivate('');
     setShow(true);
@@ -29,6 +33,7 @@ function ChatRoomCreateModal() {
   };
 
   const handleIsPrivateChange = (e) => {
+    if(!e.target.checked) setIsPrivate(false);
     setIsPrivate(e.target.checked);
   };
 
@@ -53,9 +58,37 @@ function ChatRoomCreateModal() {
         creatorId,
         isPrivate
       });
-
-      console.log('make success:', response.data);
       navigate('/chatRoom', { state: { "chatRoomId": response.data } });
+    } catch (error) {
+      console.error('make error:', error);
+    }
+  };
+
+  const handleJoinPublicChatRoom = async (chatRoomId) => {
+    const creatorId = JSON.parse(sessionStorage.getItem('dreamcup-userData')).memberId;
+    
+    try {
+      const response = await axios.post('/api/chat-rooms/public-join', {
+        "chatRoomId" : chatRoomId,
+        "participantId" : creatorId
+      });
+
+      navigate('/chatRoom', { state: { "chatRoomId": response.data.id } });
+    } catch (error) {
+      console.error('make error:', error);
+    }
+  };
+
+  const handleJoinPrivateChatRoom = async (chatRoomId) => {
+    const creatorId = JSON.parse(sessionStorage.getItem('dreamcup-userData')).memberId;
+    
+    try {
+      const response = await axios.post('/api/chat-rooms/public-join', {
+        "chatRoomId" : chatRoomId,
+        "participantId" : creatorId
+      });
+
+      navigate('/chatRoom', { state: { "chatRoomId": response.data.id } });
     } catch (error) {
       console.error('make error:', error);
     }
