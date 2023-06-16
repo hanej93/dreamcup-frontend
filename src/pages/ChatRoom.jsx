@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Container, Row, Col, ListGroup, Form, Card } from 'react-bootstrap';
 import SockJS from 'sockjs-client';
-import { Client } from '@stomp/stompjs';
+import { Stomp  } from '@stomp/stompjs';
 import axios from 'axios';
 import { useLocation, useNavigate  } from 'react-router-dom';
 
@@ -25,63 +25,50 @@ function ChatRoom() {
   const [title, setTitle ] = useState("");
   const [updatedDate, setUpdatedDate ] = useState("");
 
+  const handleWebSocket = () => {
+    const socket = new SockJS('/ws');
+    const client = Stomp.over(socket);
+    client.connect({}, frame => {
+      console.log('Connected: ' + frame);
+      client.subscribe('/exchange/chat.exchange/message.100', function(message) {
+        console.log(`<<< message: ${message}`);
+        // setMessages(prevMessages => [...prevMessages, JSON.parse(message.body)]);
+      });
+    });
+    setStompClient(client);
+    return () => {
+      if (client !== null) {
+        client.disconnect();
+      }
+      console.log("Disconnected");
+    };
+  };
+
   useEffect(() => {
-    // var client = new Client({
-    //   webSocketFactory: () => new SockJS('/ws'),
-    // });
-    // let subscription;
-
-    // client.brokerURL = '/ws';
-    // client.onConnect = function(frame) {
-    //     console.log('Connected: ' + frame);
-    //     subscription = client.subscribe('/exchange/chat.exchange/message.' + chatRoomId, function(message) {
-    //         console.log(`<<< message: ${message}`);
-    //         showMessage(JSON.parse(message.body));
-    //     });
-    // };
-
-    // client.onStompError = function(frame) {
-    //   console.log('Broker reported error: ' + frame.headers['message']);
-    //   console.log('Additional details: ' + frame.body);
-    // };
-
-    // client.activate();
-
-    // setStompClient(client);
-
-    // return () => {
-    //   if(subscription) {
-    //     subscription.unsubscribe();
-    //   }
-    //   if(client.active) {
-    //     client.deactivate();
-    //   }
-    //   console.log("Disconnected");
-    // }
-    // chatRoomId
-}, []);
-
-useEffect(() => {
-  setChatRoomId(location.state.chatRoomId);
-  handleChatRoomInfo();
-}, []);
+    handleChatRoomInfo();
+    handleWebSocket();
+  }, []);
 
   const sendMessage = () => {
     let chatVo = {
-        chatRoomId: chatRoomId,
-        senderId: sender,
-        content: message,
+      chatRoomId: chatRoomId,
+      senderId: sender,
+      message: message,
+      messageType: "MEMBER"
     };
     stompClient.send("/pub/message", {}, JSON.stringify(chatVo));
-  }
+    setMessage('');
+  };
 
   const showMessage = (message) => {
     setMessages(prevMessages => [...prevMessages, message]);
-  }
+  };
 
   const handleChatRoomInfo = () => {
+    console.log("chatRoomId ::: " + chatRoomId);
+    setChatRoomId("100");
     axios.defaults.headers.common['Authorization'] = token;
-    axios.get('/api/chat-rooms/' + chatRoomId)
+    axios.get('/api/chat-rooms/100')
     .then(response => {
       console.log(response.data);
       setCreatorName(response.data.creatorName);
@@ -94,7 +81,7 @@ useEffect(() => {
     .catch(error => {
       console.error('목록 조회 오류', error);
     });
-  } 
+  }; 
 
   const handleChatRoomMemberList = () => {
     let params = {
@@ -116,7 +103,7 @@ useEffect(() => {
     }).catch(error => {
       console.error('목록 조회 오류', error);
     });
-  }
+  };
 
   const handleJoinPublicChatRoom = async (chatRoomId) => {
     const creatorId = JSON.parse(sessionStorage.getItem('dreamcup-userData')).memberId;
@@ -180,7 +167,7 @@ useEffect(() => {
           <h4>멤버들</h4>
           <ListGroup>
             {participantMembers.map((member, i) => (
-              <ListGroup.Item key={i} >{member.nickname}</ListGroup.Item>
+              <ListGroup.Item key={i}>{member.nickname}</ListGroup.Item>
             ))}
           </ListGroup>
         </Col>
@@ -188,14 +175,16 @@ useEffect(() => {
           <h4>Chat</h4>
           <Card style={{ height: '300px', marginBottom: '10px', overflow: 'auto' }}>
             <Card.Body>
-              
+              {messages.map((message, i) => (
+                <p key={i}><strong>{message.senderId}</strong>: {message.message}</p>
+              ))}
             </Card.Body>
           </Card>
           <Form>
             <Form.Group controlId="chatMessage">
-              <Form.Control as="textarea" rows={3} />
+              <Form.Control as="textarea" rows={3} value={message} onChange={e => setMessage(e.target.value)} />
             </Form.Group>
-            <Button variant="primary" type="submit">보내기</Button>
+            <Button variant="primary" type="button" onClick={sendMessage}>보내기</Button>
           </Form>
         </Col>
       </Row>
