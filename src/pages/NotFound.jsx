@@ -1,14 +1,13 @@
 import React from 'react';
 
 const NotFound = () => {
-
-  console.log(`notFound`);
-  return (
-    <div>
-      <h1>NotFound Page</h1>
-      <p>404 Page!</p>
-    </div>
-  );
-};
+    
+    return (
+      <div className='p-5 text-center bg-light'>
+          <h1 className='mb-3'>NotFound</h1>
+          <h4 className='mb-3'>404 Page</h4>
+        </div>
+    );
+}
 
 export default NotFound;

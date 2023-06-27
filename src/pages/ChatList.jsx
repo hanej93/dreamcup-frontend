@@ -1,102 +1,73 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Card, Badge } from 'react-bootstrap';
-import axios from 'axios';
-import { useNavigate  } from 'react-router-dom';
-import InfiniteScroll from 'react-infinite-scroll-component';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import profile from '../assets/loan.png'
 
 const ChatList = () => {
-  const navigate = useNavigate();
-  const token = sessionStorage.getItem('dreamcup-token');
-  axios.defaults.headers.common['Authorization'] = token;
 
-  const [chatRooms, setChatRooms] = useState([]);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
-  const [activeRoom, setActiveRoom] = useState(null);
-
-
-  const moveToChatPage = (chatRoomId) => {
-    navigate('/chatRoom', { state: { "chatRoomId": chatRoomId } });
-  };
-
-  const onChatRoomClick = (chatRoomId) => {
-    moveToChatPage(chatRoomId);
-    setActiveRoom(chatRoomId);
-  };
-  
-  const setChatRoomTitle = (room) => {
-    let title = "[" + room.currentUserCount + " / " + room.maxUserCount + "] " + room.title;
-    return title;
-  };
-  
-  const getChatRoomList = () => {
-    console.log("getChatRoomList ::: ");
-    if( currentPage == 0 ) {
-      setChatRooms([]);
-    }
-
-    if (currentPage > 0 && currentPage >= totalPages) {
-      setHasMore(false);
-      return;
-    }
-    let params = {
-      "schType": "title",
-      "isPublicOnly": true,
-      "keyword": "",
-      "page": currentPage,
-      "size": 15
-    };
-    axios.get('/api/chat-rooms', {params: params})
-    .then(response => {
-      setChatRooms(prevRooms => [...prevRooms, ...response.data.content]);
-      setTotalPages(response.data.totalPages);
-      setCurrentPage(prevPage => prevPage + 1);
-    })
-    .catch(error => {
-      console.error('목록 조회 오류', error);
-    });
-  };
-
-  useEffect(() => {
-    getChatRoomList();
-  }, []);
+    const List = [{
+        title : "방제목 1",
+        rank : "32강",
+        template : "template",
+        nickname : "닉네임",
+        userLogo : profile,
+        memberCnt : 1,
+        maxMember : 10 
+    },
+    {
+        title : "방제목 2",
+        rank : "16강",
+        template : "template",
+        nickname : "닉네임",
+        userLogo : profile,
+        memberCnt : 1,
+        maxMember : 10 
+    },
+    {
+        title : "방제목 3",
+        rank : "32강",
+        template : "template",
+        nickname : "닉네임",
+        userLogo : profile,
+        memberCnt : 1,
+        maxMember : 10 
+    }];
 
 
-  return (
-      <InfiniteScroll
-        pullDownToRefreshThreshold={50}
-        scrollableTarget="scrollableDiv"
-        dataLength={chatRooms.length}
-        next={getChatRoomList}
-        hasMore={hasMore}
-        loader={<h4>Loading...</h4>}
-        onScroll={() => console.log('Scrolled')}
-        endMessage={
-          <p style={{ textAlign: 'center' }}>
-            <b>목록조회 끝</b>
-          </p>
-        }>
-          {chatRooms.map((room, i) => (
-            <Card 
-              key={i} 
-              onClick={() => onChatRoomClick(room.chatRoomId)} 
-              border={room.chatRoomId === activeRoom ? "primary" : ""}
-              className="mb-3"
-            >
-              <Card.Body>
-                <Card.Title>
-                  {setChatRoomTitle(room)}
-                  {room.chatRoomId === activeRoom && <Badge className="ml-2" variant="primary">Active</Badge>}
-                </Card.Title>
-                <Card.Text>
-                  { "(?인용)" + "템플릿명 - " + room.creatorName}
-                </Card.Text>
-              </Card.Body>
-            </Card>
-          ))}
-        </InfiniteScroll>
-  );
+    return (
+        <section className="vh-100" style={{backgroundColor: '#eee'}}>
+            <div className="container py-5 h-100">
+                <div className="row d-flex justify-content-center align-items-center h-100">
+                <div className="col col-xl-10">
+                    {List.map((list, i) => (
+                        <div className="card mb-5" style={{borderRadius: '15px'}}>
+                        <div className="card-body p-4">
+                            <h3 className="mb-3">{list.title} <span className="badge badge-info">{list.rank}</span></h3>
+                            <p className="small mb-0">
+                                {list.template}
+                                <span className="mx-2"> | </span>
+                                <strong> {list.nickname} </strong> 
+                                <Link>
+                                    <img src={list.userLogo} alt="avatar" className="img-fluid rounded-circle me-1" width="35"/>
+                                </Link>
+                            </p>
+                            <hr className="my-4"/>
+                            <div className="d-flex justify-content-start align-items-center">
+                                <p className="mb-0 text-uppercase">
+                                    <span className="text-muted small">인원수 {list.memberCnt} / {list.maxMember}</span>
+                                </p>
+                                <div className="progress">
+                                    <div className="progress-bar w-75" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                    ))}
+                </div>
+                </div>
+            </div>
+        </section>
+    );
+
 };
 
 export default ChatList;

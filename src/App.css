@@ -28,29 +28,6 @@
   color: #61dafb;
 }
 
-.sidebar {
-  position: fixed;
-  top: 0;
-  right: 0;
-  width: 200px;
-  height: 100%;
-  background: #333;
-  padding: 20px;
-  overflow-y: auto;
-  transform: translateX(100%);
-  transition: transform 0.3s ease-out;
-}
-
-.sidebar.open {
-  transform: translateX(0);
-}
-
-.sidebar a {
-  display: block;
-  color: #fff;
-  margin-bottom: 10px;
-}
-
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
@@ -58,4 +35,14 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.sidenav {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 200px;
+  background-color: #f8f9fa;
+  padding: 20px;
 }

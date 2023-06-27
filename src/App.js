@@ -3,12 +3,12 @@ import { BrowserRouter } from 'react-router-dom';
 import RoutesCollection from './routes/RoutesCollection';
 import './App.css';
 
-const App = () => {
+function App() {
   return (
     <BrowserRouter>
       <RoutesCollection/>
     </BrowserRouter>
   );
-};
+}
 
 export default App;

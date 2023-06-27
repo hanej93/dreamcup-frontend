@@ -1,195 +1,159 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Container, Row, Col, ListGroup, Form, Card } from 'react-bootstrap';
-import SockJS from 'sockjs-client';
-import { Stomp  } from '@stomp/stompjs';
-import axios from 'axios';
-import { useLocation, useNavigate  } from 'react-router-dom';
+import {
+    MDBContainer,
+    MDBBadge
+  } from 'mdb-react-ui-kit';
+import profileOne from '../assets/hiking.png';
+import profileTwo from '../assets/loan.png';
+import profileThree from '../assets/user.png';
+import { Link } from 'react-router-dom';
+ 
+const Chatroom = () => {
 
-function ChatRoom() {
-  const token = sessionStorage.getItem('dreamcup-token');
-  axios.defaults.headers.common['Authorization'] = token;
-  const userId = JSON.parse(sessionStorage.getItem('dreamcup-userData')).memberId;
-  const location = useLocation();
-  const navigate = useNavigate();
+    const [memberData, setMemberData] = useState([]);
+    const [showChatRoom, setShowChatRoom]  = useState(false);
 
-  const [stompClient, setStompClient] = useState(null);
-  const [message, setMessage] = useState("");
-  const [sender, setSender] = useState("");
-  const [messages, setMessages] = useState([]);
-  const [participantMembers, setParticipantMembers] = useState([]);
-  const [chatRoomId, setChatRoomId] = useState("");
+    const createMemberData = () => {
+        let data = {};
+        let alldata = [];
+        data.imgurl = profileTwo; //이미지url 
+        data.currentOnlineCheck = "O"; // Online구분값 O: 온라인, X: 비접속, Y: 자리비움, R: 바쁨
+        data.selfIntro = "자기소개문구1";
+        data.stateStr = "대기중"; // 상태 문구
+        data.userNickname = "테스트유저1"; // 이름
+        data.alertCnt = "5"; // 알림숫자
+        alldata.push(data)
+        data = {};
+        data.imgurl = profileOne; // 이미지url
+        data.currentOnlineCheck = "Y"; // Online구분값 O: 온라인, X: 비접속, Y: 자리비움, R: 바쁨
+        data.selfIntro = "자기소개문구2";
+        data.stateStr = "게임 참가중"; // 상태 문구
+        data.userNickname = "테스트유저2"; // 이름
+        data.alertCnt = 0; // 알림숫자
+        alldata.push(data)
 
-  const [creatorName, setCreatorName ] = useState("");
-  const [currentUserCount, setCurrentUserCount ] = useState("");
-  const [maxUserCount, setMaxUserCount ] = useState("");
-  const [title, setTitle ] = useState("");
-  const [updatedDate, setUpdatedDate ] = useState("");
-
-  const handleWebSocket = () => {
-    const socket = new SockJS('/ws');
-    const client = Stomp.over(socket);
-    client.connect({}, frame => {
-      console.log('Connected: ' + frame);
-      client.subscribe('/exchange/chat.exchange/message.100', function(message) {
-        console.log(`<<< message: ${message}`);
-        // setMessages(prevMessages => [...prevMessages, JSON.parse(message.body)]);
-      });
-    });
-    setStompClient(client);
-    return () => {
-      if (client !== null) {
-        client.disconnect();
-      }
-      console.log("Disconnected");
+        setMemberData(alldata);
     };
-  };
 
-  useEffect(() => {
-    handleChatRoomInfo();
-    handleWebSocket();
-  }, []);
-
-  const sendMessage = () => {
-    let chatVo = {
-      chatRoomId: chatRoomId,
-      senderId: sender,
-      message: message,
-      messageType: "MEMBER"
-    };
-    stompClient.send("/pub/message", {}, JSON.stringify(chatVo));
-    setMessage('');
-  };
-
-  const showMessage = (message) => {
-    setMessages(prevMessages => [...prevMessages, message]);
-  };
-
-  const handleChatRoomInfo = () => {
-    console.log("chatRoomId ::: " + chatRoomId);
-    setChatRoomId("100");
-    axios.defaults.headers.common['Authorization'] = token;
-    axios.get('/api/chat-rooms/100')
-    .then(response => {
-      console.log(response.data);
-      setCreatorName(response.data.creatorName);
-      setCurrentUserCount(response.data.currentUserCount);
-      setMaxUserCount(response.data.maxUserCount);
-      setTitle(response.data.title);
-      setUpdatedDate(response.data.updatedDate);
-      handleChatRoomMemberList();
-    })
-    .catch(error => {
-      console.error('목록 조회 오류', error);
-    });
-  }; 
-
-  const handleChatRoomMemberList = () => {
-    let params = {
-      "ChatRoomId" : chatRoomId
-    };
-    axios.get('/api/chat-rooms/members', {params : params})
-    .then(response => {
-      console.log('목록 조회 성공', response.data);
-      setParticipantMembers(response.data);
-      let check = false;
-      response.data.forEach((elem, index)=>{
-        if(elem.participantId === userId) {
-          check = true;
+    const chooseBadge = (params) => {
+        switch (params) {
+          case 'P':
+            return <MDBBadge color='primary' dot />
+          case 'Y':
+            return <MDBBadge color='warning' dot />
+          case 'R':
+            return <MDBBadge color='danger' dot />
+          case 'O':
+            return <MDBBadge color='success' dot />
+          case 'X':
+            return <MDBBadge color='secondary' dot />
+          default:
+            return <MDBBadge color='secondary' dot />
         }
-      });
-      if(!check) {
-        handleJoinPublicChatRoom(chatRoomId);
       }
-    }).catch(error => {
-      console.error('목록 조회 오류', error);
-    });
-  };
 
-  const handleJoinPublicChatRoom = async (chatRoomId) => {
-    const creatorId = JSON.parse(sessionStorage.getItem('dreamcup-userData')).memberId;
-    
-    try {
-      const response = await axios.post('/api/chat-rooms/public-join', {
-        "chatRoomId" : chatRoomId,
-        "participantId" : creatorId
-      });
 
-      navigate('/chatRoom', { state: { "chatRoomId": response.data.id } });
-    } catch (error) {
-      console.error('make error:', error);
-    }
-  };
+    useEffect(()=>{
+        createMemberData();
+      }, []);
 
-  const handleJoinPrivateChatRoom = async (chatRoomId) => {
-    const creatorId = JSON.parse(sessionStorage.getItem('dreamcup-userData')).memberId;
-    
-    try {
-      const response = await axios.post('/api/chat-rooms/private-join', {
-        "privateCode" : "",
-        "participantId" : creatorId
-      });
+    return (
+        <section style={{ backgroundColor: '#eee', borderRadius: '40px', position: 'absolute', bottom: '3rem', right: '3rem'}}>
+            <MDBContainer className="py-5">
+                <div className="row">
+                    <div className="col-md-12">
+                        <div className="card" id="chat3" style={{borderRadius: '15px'}}>
+                            <div className="card-body">
+                                <div className="row">
+                                    <div className="col-md-6 col-lg-5 col-xl-4 mb-4 mb-md-0" style={{width: '25rem'}}>
+                                        <div className="p-3" >
+                                            <div className="input-group rounded mb-3">
+                                                <input type="search" className="form-control rounded" placeholder="Search" aria-label="Search"
+                                                aria-describedby="search-addon" />
+                                                <span className="input-group-text border-0" id="search-addon">
+                                                    <i className="fas fa-search"></i>
+                                                </span>
+                                            </div>
+                                            <div id="scrollableDivLeft" style={{position: 'relative', height: '20rem', overflow: "auto"}}>
+                                                <ul className="list-unstyled mb-0">
+                                                    {memberData.map((data, i) => {
+                                                        return (
+                                                        <li key={i} className="p-2 border-bottom">
+                                                            <Link className="d-flex justify-content-between" onClick={() => setShowChatRoom(!showChatRoom)}>
+                                                            <div className="d-flex flex-row">
+                                                                <div>
+                                                                    {chooseBadge(data.currentOnlineCheck)}
+                                                                    <img
+                                                                        src={data.imgurl}
+                                                                        alt="avatar" className="d-flex align-self-center me-3" width="60em"/>                                                
+                                                                </div>
+                                                                <div className="pt-1">
+                                                                <p className="fw-bold mb-0">{data.userNickname}</p>
+                                                                <p className="small text-muted">{data.selfIntro}</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="pt-1">
+                                                                <p className="small text-muted mb-1">{data.stateStr}</p>
+                                                                {data.alertCnt > 0 &&  (<span className="badge bg-danger rounded-pill float-end">{data.alertCnt}</span>)}
+                                                            </div>
+                                                            </Link>
+                                                        </li>);
+                                                    })}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
 
-      navigate('/chatRoom', { state: { "chatRoomId": response.data.id } });
-    } catch (error) {
-      console.error('make error:', error);
-    }
-  };
+                                    {showChatRoom && 
+                                    (<div className="col-md-6 col-lg-5 col-xl-4 ml-3" style= {{width: '40rem'}}>
+                                        <div id="scrollableDivRight" className="pt-3 pe-3" style= {{position: 'relative', height: '20rem' , overflow: "auto"}}>
 
-  const handleChatRoomExit = () => {
-    
-    axios.post('/api/chat-rooms/leave',{
-      "chatRoomId" : chatRoomId,
-      "participantId" : userId
-    })
-    .then(response => {
-      console.error('목록 조회 성공', response.data);
-      navigate('/');
-    }).catch(error => {
-      console.error('목록 조회 오류', error);
-    });
-  }
+                                            <div className="d-flex flex-row justify-content-start">
+                                                <img src={profileOne}
+                                                alt="avatar 1" style={{width: '45px', height: '100%' }}/>
+                                                <div>
+                                                    <p className="small p-2 ms-3 mb-1 rounded-3" style={{ backgroundColor: '#f5f6f7' }}>
+                                                        테스트 입니다. 데이터 메시지를 보내고 있어요.
+                                                    </p>
+                                                    <p className="small ms-3 mb-3 rounded-3 text-muted float-end">12:30 PM | 6월 12일</p>
+                                                </div>
+                                            </div>
 
-  return (
-    <Container>
-      <Row>
-        <Col>
-          <h2>{title}</h2>
-          <p>방장 : {creatorName}</p>
-          <p>참가 인원 수 : {currentUserCount} / {maxUserCount}</p>
-          <p>{updatedDate}</p>
-        </Col>
-        <Col xs={2}>
-          <Button variant="danger" onClick={handleChatRoomExit}>나가기</Button>
-        </Col>
-      </Row>
-      <Row>
-        <Col xs={3}>
-          <h4>멤버들</h4>
-          <ListGroup>
-            {participantMembers.map((member, i) => (
-              <ListGroup.Item key={i}>{member.nickname}</ListGroup.Item>
-            ))}
-          </ListGroup>
-        </Col>
-        <Col>
-          <h4>Chat</h4>
-          <Card style={{ height: '300px', marginBottom: '10px', overflow: 'auto' }}>
-            <Card.Body>
-              {messages.map((message, i) => (
-                <p key={i}><strong>{message.senderId}</strong>: {message.message}</p>
-              ))}
-            </Card.Body>
-          </Card>
-          <Form>
-            <Form.Group controlId="chatMessage">
-              <Form.Control as="textarea" rows={3} value={message} onChange={e => setMessage(e.target.value)} />
-            </Form.Group>
-            <Button variant="primary" type="button" onClick={sendMessage}>보내기</Button>
-          </Form>
-        </Col>
-      </Row>
-    </Container>
-  );
-}
+                                            <div className="d-flex flex-row justify-content-end">
+                                                <div>
+                                                    <p className="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">
+                                                        내가 보내는 메세지 입니다.
+                                                    </p>
+                                                    <p className="small me-3 mb-3 rounded-3 text-muted">12:30 PM | 6월 12일</p>
+                                                </div>
+                                                <img src={profileThree}
+                                                alt="avatar 1" style={{ width: '45px', height: '100%'}}/>
+                                            </div>
 
-export default ChatRoom;
+                                            <div className="divider d-flex align-items-center mb-4 border-bottom">
+                                                <p className="text-center mx-3 mb-0" style={{color: '#a2aab7'}}>Today</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
+                                            <img src={profileOne}
+                                                alt="avatar 3" style={{ width: '2rem', height: '100%', margin: '1rem'}}/>
+                                            <input type="text" className="form-control form-control-lg" id="exampleFormControlInput2" placeholder="Type message"/>
+                                            <Link className="ms-1 text-muted" ><i className="fas fa-paperclip"></i></Link>
+                                            <Link className="ms-3 text-muted" ><i className="fas fa-smile"></i></Link>
+                                            <Link className="ms-3" ><i className="fas fa-paper-plane"></i></Link>
+                                        </div>
+                                    </div>)}
+                                    {!showChatRoom && <div className="col-md-6 col-lg-7 col-xl-8"></div>}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </MDBContainer>
+        </section>
+    );
+
+};
+
+export default Chatroom;
