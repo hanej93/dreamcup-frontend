@@ -21,7 +21,7 @@ const Chatroom = () => {
         data.selfIntro = "자기소개문구1";
         data.stateStr = "대기중"; // 상태 문구
         data.userNickname = "테스트유저1"; // 이름
-        data.alertCnt = "5"; // 알림숫자
+        data.alertCnt = 5; // 알림숫자
         alldata.push(data)
         data = {};
         data.imgurl = profileOne; // 이미지url

@@ -23,7 +23,7 @@ const Home = () => {
         <div className='mask' style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}>
           <div className='d-flex justify-content-center align-items-center h-100'>
             <div className='text-white'>
-              <h1 className='mb-3'>드림컵에 오신걸 환영합니다</h1>
+              <h1 className='mb-3'>DreamCup에 오신걸 환영합니다</h1>
               <h5 className='mb-4'>오늘도 좋은하루 되세요</h5>
               <MDBBtn
                 className="m-2 btn-outline-light "
