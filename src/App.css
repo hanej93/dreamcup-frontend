@@ -46,3 +46,29 @@
   background-color: #f8f9fa;
   padding: 20px;
 }
+
+.toggle-chat {
+  position: absolute;
+  bottom: 3rem; 
+  right: 4rem;
+}
+
+.slide-in-right-side {
+  transform: translateX(0);
+  transition: transform 0.5s ease-in-out;
+}
+
+.slide-out-right-side {
+  transform: translateX(-100%);
+  transition: transform 0.5s ease-in-out;
+}
+
+.slide-up {
+  transform: translateY(0);
+  transition: transform 0.5s ease-in-out;
+}
+
+.slide-down {
+  transform: translateY(100%);
+  transition: transform 0.5s ease-in-out;
+}

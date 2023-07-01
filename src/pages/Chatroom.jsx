@@ -8,10 +8,21 @@ import profileTwo from '../assets/loan.png';
 import profileThree from '../assets/user.png';
 import { Link } from 'react-router-dom';
  
-const Chatroom = () => {
+const Chatroom = ({show}) => {
 
     const [memberData, setMemberData] = useState([]);
     const [showChatRoom, setShowChatRoom]  = useState(false);
+
+    const [animationClass, setAnimationClass] = useState('');
+
+    useEffect(() => {
+        if (show) {
+        setAnimationClass('slide-up');
+        } else {
+        setAnimationClass('slide-down');
+        }
+        console.log("dude" + show);
+    }, [show]);
 
     const createMemberData = () => {
         let data = {};
@@ -58,7 +69,7 @@ const Chatroom = () => {
       }, []);
 
     return (
-        <section style={{ backgroundColor: '#eee', borderRadius: '40px', position: 'absolute', bottom: '3rem', right: '3rem'}}>
+        <section className={`${animationClass} toggle-chat position-fixed`} style={{ backgroundColor: '#eee', borderRadius: '40px'}}>
             <MDBContainer className="py-5">
                 <div className="row">
                     <div className="col-md-12">

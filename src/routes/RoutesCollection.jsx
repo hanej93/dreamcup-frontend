@@ -11,7 +11,7 @@ import NotFound from '../pages/NotFound.jsx';
 import BasicHeader from '../components/Header/BasicHeader'
 
 const RoutesCollection = () => {
-  const [showNavExternal, setShowNavExternal]  = useState(false);
+  const [showChat, setShowChat] = useState(false);
 
   return (
     <>
@@ -25,11 +25,9 @@ const RoutesCollection = () => {
         <Route exact path="*" element={<NotFound/>} />
       </Routes>
       <MDBContainer>
-        {showNavExternal && (
-            <Chatroom></Chatroom>
-            )}
+        <Chatroom show={showChat}></Chatroom>
       </MDBContainer>
-      <button type="button" className="btn btn-dark btn-floating" style={{ position: 'fixed', right: '20px', bottom: '20px' }}  onClick={() => setShowNavExternal(!showNavExternal)}>
+      <button type="button" className="btn btn-dark btn-floating" style={{ position: 'fixed', right: '20px', bottom: '20px' }}  onClick={() => setShowChat(!showChat)}>
           <i className="fab fa-rocketchat"></i>
       </button>
     </>

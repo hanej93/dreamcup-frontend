@@ -1,12 +1,14 @@
 import React, {useState} from 'react';
-import { MDBContainer, MDBNavbar, MDBIcon, MDBNavbarNav, MDBNavbarItem, MDBDropdown, MDBDropdownItem, MDBDropdownMenu, MDBDropdownToggle ,MDBBadge, MDBNavbarBrand, MDBBtn } from 'mdb-react-ui-kit';
+import { MDBListGroup, MDBListGroupItem, MDBContainer, MDBNavbar, MDBIcon, MDBNavbarNav, MDBNavbarItem, MDBDropdown, MDBDropdownItem, MDBDropdownMenu, MDBDropdownToggle ,MDBBadge, MDBNavbarBrand } from 'mdb-react-ui-kit';
 import userImage from '../../assets/user.png'
 import SideNav from '../../components/Nav/SideNav'
-import { useNavigate  } from 'react-router-dom';
+import { Link, useNavigate  } from 'react-router-dom';
 
 const BasicHeader = () => {
     const [showNavExternal, setShowNavExternal]  = useState(false);
     const navigate = useNavigate();
+
+    // 여기서 메뉴 목록 가져오는 파트
 
     const moveToMyProfilePage = (e) => {
         e.preventDefault();
@@ -17,8 +19,6 @@ const BasicHeader = () => {
         e.preventDefault();
         console.log("LogOut");
     };
-
-    
 
     return (
         <header style={{width : '100%'}}>
@@ -79,7 +79,22 @@ const BasicHeader = () => {
                     </MDBNavbarNav>
                 </MDBContainer>
             </MDBNavbar>
-            {showNavExternal && <SideNav />}
+            <SideNav show={showNavExternal}>
+            <MDBListGroup>
+                <MDBListGroupItem>
+                <Link to="/">메인</Link>
+                </MDBListGroupItem>
+                <MDBListGroupItem>
+                <Link to="/gameroom">게임방</Link>
+                </MDBListGroupItem>
+                <MDBListGroupItem>
+                <Link to="/chatlist">목록</Link>
+                </MDBListGroupItem>
+                <MDBListGroupItem>
+                <Link to="/sss">에러페이지</Link>
+                </MDBListGroupItem>
+            </MDBListGroup>
+            </SideNav>
         </header>
     );
 }
