@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import { MDBContainer, MDBNavbar, MDBIcon, MDBNavbarNav, MDBNavbarItem, MDBDropdown, MDBDropdownItem, MDBDropdownMenu, MDBDropdownToggle ,MDBBadge, MDBNavbarBrand, MDBBtn } from 'mdb-react-ui-kit';
 import userImage from '../../assets/user.png'
 import SideNav from '../../components/Nav/SideNav'
-import { Link, useNavigate  } from 'react-router-dom';
+import { useNavigate  } from 'react-router-dom';
 
 const BasicHeader = () => {
     const [showNavExternal, setShowNavExternal]  = useState(false);
