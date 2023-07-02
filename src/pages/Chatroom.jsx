@@ -3,10 +3,10 @@ import {
     MDBContainer,
     MDBBadge
   } from 'mdb-react-ui-kit';
-import profileOne from '../assets/hiking.png';
 import profileTwo from '../assets/loan.png';
-import profileThree from '../assets/user.png';
 import { Link } from 'react-router-dom';
+import Chatting from '../components/Chat/Chatting';
+import axios from 'axios';
  
 const Chatroom = ({show}) => {
 
@@ -17,31 +17,53 @@ const Chatroom = ({show}) => {
 
     useEffect(() => {
         if (show) {
-        setAnimationClass('slide-up');
+            setAnimationClass('slide-up');
+            callFriendList();
         } else {
-        setAnimationClass('slide-down');
+            setAnimationClass('slide-down');
         }
         console.log("dude" + show);
     }, [show]);
 
-    const createMemberData = () => {
+    const callFriendList= async () => {
+        try {
+          let loginData = JSON.parse(localStorage.getItem('userInfo'));
+            
+          const requestData = { 
+                page : 1,
+                size : 10,
+                memberId: loginData.memberId,
+                accepted : true
+          };
+
+          console.log("requestData!");
+          console.log(requestData);
+          axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
+          
+          const friendListResponse = await axios.get('/api/friendship', requestData);
+          console.log("success!")
+          console.log(friendListResponse.data);
+          createMemberData(friendListResponse.data.content);
+          return;
+        } catch (error) {
+          console.log(error);
+          return;
+        }
+    };
+
+    const createMemberData = (inputData) => {
         let data = {};
         let alldata = [];
-        data.imgurl = profileTwo; //이미지url 
-        data.currentOnlineCheck = "O"; // Online구분값 O: 온라인, X: 비접속, Y: 자리비움, R: 바쁨
-        data.selfIntro = "자기소개문구1";
-        data.stateStr = "대기중"; // 상태 문구
-        data.userNickname = "테스트유저1"; // 이름
-        data.alertCnt = 5; // 알림숫자
-        alldata.push(data)
-        data = {};
-        data.imgurl = profileOne; // 이미지url
-        data.currentOnlineCheck = "Y"; // Online구분값 O: 온라인, X: 비접속, Y: 자리비움, R: 바쁨
-        data.selfIntro = "자기소개문구2";
-        data.stateStr = "게임 참가중"; // 상태 문구
-        data.userNickname = "테스트유저2"; // 이름
-        data.alertCnt = 0; // 알림숫자
-        alldata.push(data)
+
+        inputData.map((elem, indx) => {
+            data.imgurl = profileTwo; //이미지url 
+            data.currentOnlineCheck = "O"; // Online구분값 O: 온라인, X: 비접속, Y: 자리비움, R: 바쁨
+            data.selfIntro = "자기소개문구 " + indx;
+            data.stateStr = "대기중"; // 상태 문구
+            data.userNickname = elem.nickname; // 이름
+            data.alertCnt = 5; // 알림숫자
+            alldata.push(data)
+        });
 
         setMemberData(alldata);
     };
@@ -61,12 +83,7 @@ const Chatroom = ({show}) => {
           default:
             return <MDBBadge color='secondary' dot />
         }
-      }
-
-
-    useEffect(()=>{
-        createMemberData();
-      }, []);
+    };
 
     return (
         <section className={`${animationClass} toggle-chat position-fixed`} style={{ backgroundColor: '#eee', borderRadius: '40px'}}>
@@ -115,47 +132,8 @@ const Chatroom = ({show}) => {
                                         </div>
                                     </div>
 
-                                    {showChatRoom && 
-                                    (<div className="col-md-6 col-lg-5 col-xl-4 ml-3" style= {{width: '40rem'}}>
-                                        <div id="scrollableDivRight" className="pt-3 pe-3" style= {{position: 'relative', height: '20rem' , overflow: "auto"}}>
+                                    <Chatting show={showChatRoom}></Chatting>
 
-                                            <div className="d-flex flex-row justify-content-start">
-                                                <img src={profileOne}
-                                                alt="avatar 1" style={{width: '45px', height: '100%' }}/>
-                                                <div>
-                                                    <p className="small p-2 ms-3 mb-1 rounded-3" style={{ backgroundColor: '#f5f6f7' }}>
-                                                        테스트 입니다. 데이터 메시지를 보내고 있어요.
-                                                    </p>
-                                                    <p className="small ms-3 mb-3 rounded-3 text-muted float-end">12:30 PM | 6월 12일</p>
-                                                </div>
-                                            </div>
-
-                                            <div className="d-flex flex-row justify-content-end">
-                                                <div>
-                                                    <p className="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">
-                                                        내가 보내는 메세지 입니다.
-                                                    </p>
-                                                    <p className="small me-3 mb-3 rounded-3 text-muted">12:30 PM | 6월 12일</p>
-                                                </div>
-                                                <img src={profileThree}
-                                                alt="avatar 1" style={{ width: '45px', height: '100%'}}/>
-                                            </div>
-
-                                            <div className="divider d-flex align-items-center mb-4 border-bottom">
-                                                <p className="text-center mx-3 mb-0" style={{color: '#a2aab7'}}>Today</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
-                                            <img src={profileOne}
-                                                alt="avatar 3" style={{ width: '2rem', height: '100%', margin: '1rem'}}/>
-                                            <input type="text" className="form-control form-control-lg" id="exampleFormControlInput2" placeholder="Type message"/>
-                                            <Link className="ms-1 text-muted" ><i className="fas fa-paperclip"></i></Link>
-                                            <Link className="ms-3 text-muted" ><i className="fas fa-smile"></i></Link>
-                                            <Link className="ms-3" ><i className="fas fa-paper-plane"></i></Link>
-                                        </div>
-                                    </div>)}
-                                    {!showChatRoom && <div className="col-md-6 col-lg-7 col-xl-8"></div>}
                                 </div>
                             </div>
                         </div>

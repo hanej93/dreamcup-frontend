@@ -72,3 +72,17 @@
   transform: translateY(100%);
   transition: transform 0.5s ease-in-out;
 }
+
+.slide-show {
+  visibility: visible;
+  opacity: 1;
+  width: 40rem;
+  transition: opacity 1s, width 1s 1s;
+}
+
+.slide-hide {
+  visibility: hidden;
+  opacity: 0;
+  width: 0rem;
+  transition: opacity 1s, width 1s 1s;
+}

@@ -7,9 +7,11 @@ import {
     MDBTabsContent,
     MDBTabsPane
   } from 'mdb-react-ui-kit';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
  
 const Login = () => {
+    const navigate = useNavigate();
     
     const [justifyActive, setJustifyActive] = useState('tab1');
     // 화면 변수
@@ -17,8 +19,10 @@ const Login = () => {
     const [inptbxLoginPassword, setInptbxLoginPassword] = useState('');
     const [inptbxSignUpEmailAddress, setInptbxSignUpEmailAddress] = useState('');
     const [inptbxSignUpNickName, setInptbxSignUpNickName] = useState('');
+    const [inptbxSignUpTag, setInptbxSignUpTag] = useState('');
     const [inptbxSignUpPassword, setInptbxSignUpPassword] = useState('');
     const [inptbxSignUpPasswordCheck, setInptbxSignUpPasswordCheck] = useState('');
+    const [btnRegisterDisabled, setBtnRegisterDisabled] = useState(true);
 
     const handleJustifyClick = (value) => {
         if (value === justifyActive) {
@@ -49,17 +53,77 @@ const Login = () => {
         setInptbxSignUpEmailAddress(e.target.value);
     };
 
+    const handleSignUpTagChange = (e) =>{
+        setInptbxSignUpTag(e.target.value);
+    };
+
     const handleSignUpNickNameChange = (e) =>{
         setInptbxSignUpNickName(e.target.value);
     };
 
     const handleSignUpPasswordChange = (e) =>{
         setInptbxSignUpPassword(e.target.value);
+        if(e.target.value === inptbxSignUpPasswordCheck) {
+            console.log("해제");
+            setBtnRegisterDisabled(false);
+        } else {
+            setBtnRegisterDisabled(true);
+        }
     };
 
     const handleSignUpPasswordCheckChange = (e) =>{
         setInptbxSignUpPasswordCheck(e.target.value);
+        if(e.target.value === inptbxSignUpPassword) {
+            console.log("해제");
+            setBtnRegisterDisabled(false);
+        } else {
+            setBtnRegisterDisabled(true);
+        }
     };
+
+    const handleRegistration = async (e) => {
+        e.preventDefault();
+        try {
+          const registrationData = { 
+              username : inptbxSignUpEmailAddress, 
+              nickname : inptbxSignUpNickName,
+              nameTag  : inptbxSignUpTag,
+              password : inptbxSignUpPassword };
+          
+          const signupResponse = await axios.post('/api/signup', registrationData);
+          console.log("success!")
+          console.log(signupResponse.data);
+          handleJustifyClick('tab1');
+          return;
+        } catch (error) {
+          console.log(error);
+          return;
+        }
+    };
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        try {
+          const loginData = { 
+              username : inptbxLoginEmailAddress,
+              password : inptbxLoginPassword };
+          
+          const loginResponse = await axios.post('/api/login', loginData);
+          console.log("success!")
+          console.log(loginResponse.data);
+
+          const token = loginResponse.headers.authorization;
+
+          localStorage.setItem('token', token);
+          localStorage.setItem('userInfo', JSON.stringify(loginResponse.data));
+          navigate('/');
+          return;
+        } catch (error) {
+          console.log(error);
+          return;
+        }
+    };
+
 
     return (
         <section className="vh-100" style={{backgroundColor: '#eee'}}>
@@ -83,7 +147,7 @@ const Login = () => {
                                         </MDBTabs>
                                         <MDBTabsContent>
                                             <MDBTabsPane show={justifyActive === 'tab1'} id="pills-login" >
-                                                <form className="text-center">
+                                                <form className="text-center" onSubmit={handleLogin}>
                                                     <h3 className="mb-3 mt-3">로그인</h3>
                                                     <div className="d-flex flex-row align-items-center mb-4">
                                                         <i className="fas fa-envelope fa-lg me-3 fa-fw"></i>
@@ -115,21 +179,26 @@ const Login = () => {
                                                 </form>
                                             </MDBTabsPane>
                                             <MDBTabsPane show={justifyActive === 'tab2'} id="pills-register" >
-                                                <form className="text-center">
+                                                <form className="text-center" onSubmit={handleRegistration}>
                                                     <h3 className="mb-3 mt-3">등록하기</h3>
 
                                                     <div className="d-flex flex-row align-items-center mb-4">
-                                                        <i className="fas fa-user fa-lg me-3 fa-fw"></i>
-                                                        <MDBInput id="inptbxSignUpEmailAddress" value={inptbxSignUpEmailAddress} label='이메일주소' type='text' onChange={handleSignUpEmailAddressChange}/>
+                                                        <i className="fas fa-user fa-lg me-3 fa-fw"/>
+                                                        <MDBInput id="inptbxSignUpEmailAddress" value={inptbxSignUpEmailAddress} label='이메일주소' type='email' onChange={handleSignUpEmailAddressChange}/>
                                                     </div>
 
                                                     <div className="d-flex flex-row align-items-center mb-4">
-                                                        <i className="fas fa-envelope fa-lg me-3 fa-fw"></i>
-                                                        <MDBInput id="inptbxSignUpNickName" value={inptbxSignUpNickName} label='닉네임' type='email' onChange={handleSignUpNickNameChange}/>
+                                                        <i className="fas fa-envelope fa-lg me-3 fa-fw"/>
+                                                        <MDBInput id="inptbxSignUpNickName" value={inptbxSignUpNickName} label='닉네임' type='text' onChange={handleSignUpNickNameChange}/>
                                                     </div>
 
                                                     <div className="d-flex flex-row align-items-center mb-4">
-                                                        <i className="fas fa-lock fa-lg me-3 fa-fw"></i>
+                                                        <i className="fas fa-tag fa-lg me-3 fa-fw"/>
+                                                        <MDBInput id="inptbxSignUpTag" value={inptbxSignUpTag} label='태그' type='text' maxLength={4} onChange={handleSignUpTagChange}/>
+                                                    </div>
+
+                                                    <div className="d-flex flex-row align-items-center mb-4">
+                                                        <i className="fas fa-lock fa-lg me-3 fa-fw"/>
                                                         <MDBInput id="inptbxSignUpPassword" value={inptbxSignUpPassword} label='비밀번호' type='password' onChange={handleSignUpPasswordChange}/>
                                                     </div>
 
@@ -145,7 +214,7 @@ const Login = () => {
                                                         </label>
                                                     </div>
                                                     
-                                                    <button type="submit" className="btn btn-lg btn-primary btn-block mb-3">등록하기</button>
+                                                    <button type="submit" className="btn btn-lg btn-primary btn-block mb-3" disabled={btnRegisterDisabled}>등록하기</button>
                                                     <hr className="hr" />
                                                     <div className="text-center mb-3">
                                                         <button className="btn btn-lg btn-block btn-primary" style={{backgroundColor: '#dd4b39'}}
